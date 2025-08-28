@@ -150,6 +150,30 @@ export const Api = {
       { method: "GET" },
     );
   },
+  requestAccess(payload: {
+    companyName: string;
+    vatNumber?: string;
+    companyRegister?: string;
+    contactPerson: string;
+    email: string;
+    phone: string;
+    address: { street: string; zipCode: string; city: string; country?: string };
+  }) {
+    return request<{ ok: true }>("/auth/register", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  validatePasswordToken(token: string) {
+    return request<{ ok: true }>(`/auth/password/validate?token=${encodeURIComponent(token)}`);
+  },
+  setPassword(token: string, password: string) {
+    return request<{ ok: true }>("/auth/password/set", {
+      method: "POST",
+      body: JSON.stringify({ token, password }),
+    });
+  },
 
   // Kategorien
   listCategories() {

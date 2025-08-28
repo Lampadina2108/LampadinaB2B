@@ -9,7 +9,7 @@ type CustomerRow = {
   contact_person?: string | null;
   phone?: string | null;
   email?: string | null;
-  approval_status?: "pending" | "active" | string | null;
+  approval_status?: "pending" | "invited" | "active" | string | null;
   created_at?: string | null;
 };
 
@@ -170,9 +170,13 @@ export default function AdminPanel() {
                       <span className="inline-flex items-center gap-1 rounded bg-green-100 px-2 py-0.5 text-green-700">
                         <CheckCircle2 size={14} /> Aktiv
                       </span>
-                    ) : (
+                    ) : c.approval_status === "invited" ? (
                       <span className="inline-flex items-center gap-1 rounded bg-amber-100 px-2 py-0.5 text-amber-700">
-                        • Offen
+                        Einladung verschickt
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded bg-gray-100 px-2 py-0.5 text-gray-700">
+                        Neu
                       </span>
                     )}
                   </td>
