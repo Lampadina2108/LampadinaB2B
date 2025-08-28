@@ -150,6 +150,20 @@ export const Api = {
       { method: "GET" },
     );
   },
+  requestAccess(payload: {
+    companyName: string;
+    vatNumber?: string;
+    companyRegister?: string;
+    contactPerson: string;
+    email: string;
+    phone: string;
+    address: { street: string; zipCode: string; city: string; country?: string };
+  }) {
+    return request<{ ok: true }>("/auth/register", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
 
   // Kategorien
   listCategories() {
