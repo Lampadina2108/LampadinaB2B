@@ -165,6 +165,17 @@ export const Api = {
     });
   },
 
+  validatePasswordToken(token: string) {
+    return request<{ ok: true }>(`/auth/password/validate?token=${encodeURIComponent(token)}`);
+  },
+  setPassword(token: string, password: string) {
+    return request<{ ok: true }>("/auth/password/set", {
+      method: "POST",
+      body: JSON.stringify({ token, password }),
+    });
+  },
+
+
   // Kategorien
   listCategories() {
     return request<Category[]>("/categories");

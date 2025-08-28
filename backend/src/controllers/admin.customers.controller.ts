@@ -41,7 +41,8 @@ export async function approveCustomer(req: Request, res: Response) {
 
     await pool.query<ResultSetHeader>(
       `UPDATE customers
-          SET approval_status='active', activated_at=NOW(), activation_sent_at=NOW()
+          SET approval_status='invited', activation_sent_at=NOW()
+
         WHERE id = ?`,
       [id]
     );
@@ -55,7 +56,7 @@ export async function approveCustomer(req: Request, res: Response) {
     );
 
     const base = ENV.PUBLIC_BASE_URL || ENV.FRONTEND_URL;
-    const link = `${base.replace(/\/$/, "")}/activate?token=${token}`;
+    const link = `${base.replace(/\/$/, "")}/set-password?token=${token}`;
 
     try {
       await sendMail(
@@ -80,7 +81,17 @@ export async function deleteCustomer(req: Request, res: Response) {
     const id = Number(req.params.id);
     if (!Number.isFinite(id)) return res.status(400).json({ error: "bad id" });
 
-    await pool.query<ResultSetHeader>("DELETE FROM customers WHERE id = ?", [id]);
+    // zugehörigen User ermitteln und löschen (ON DELETE CASCADE entfernt Kunden)
+    const [rows] = await pool.query<RowDataPacket[]>(
+      "SELECT user_id FROM customers WHERE id = ? LIMIT 1",
+      [id]
+    );
+    const userId = rows[0]?.user_id;
+    if (userId) {
+      await pool.query<ResultSetHeader>("DELETE FROM users WHERE id = ?", [userId]);
+    } else {
+      await pool.query<ResultSetHeader>("DELETE FROM customers WHERE id = ?", [id]);
+    }
     return res.json({ ok: true });
   } catch (err) {
     console.error("deleteCustomer error:", err);

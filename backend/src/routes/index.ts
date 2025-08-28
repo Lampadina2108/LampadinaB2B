@@ -7,6 +7,7 @@ import * as Profile from "../controllers/profile.controller";
 import * as Products from "../controllers/products.controller";
 import * as Categories from "../controllers/categories.controller";
 import * as AdminCustomers from "../controllers/admin.customers.controller";
+import * as Password from "../controllers/password.controller";
 
 const router = Router();
 
@@ -35,6 +36,10 @@ router.post("/auth/register", (req, res, next) => {
 });
 
 router.get("/auth/me", requireAuth, Auth.me);
+
+// Passwort setzen / validieren
+router.get("/auth/password/validate", Password.validatePasswordToken);
+router.post("/auth/password/set", Password.setPassword);
 
 // ---- Profil (liefert user + customer)
 router.get("/profile", requireAuth, Profile.getProfile);

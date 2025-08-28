@@ -41,6 +41,7 @@ const Profile = __importStar(require("../controllers/profile.controller"));
 const Products = __importStar(require("../controllers/products.controller"));
 const Categories = __importStar(require("../controllers/categories.controller"));
 const AdminCustomers = __importStar(require("../controllers/admin.customers.controller"));
+const Password = __importStar(require("../controllers/password.controller"));
 const router = (0, express_1.Router)();
 // sorgt dafür, dass req.user aus dem Cookie gesetzt wird
 router.use(auth_1.attachUser);
@@ -58,6 +59,9 @@ router.post("/auth/register", (req, res, next) => {
     return fn(req, res, next);
 });
 router.get("/auth/me", auth_1.requireAuth, Auth.me);
+// Passwort setzen / validieren
+router.get("/auth/password/validate", Password.validatePasswordToken);
+router.post("/auth/password/set", Password.setPassword);
 // ---- Profil (liefert user + customer)
 router.get("/profile", auth_1.requireAuth, Profile.getProfile);
 // ---- Kategorien (bei dir heißt die Funktion meist list oder listCategories)

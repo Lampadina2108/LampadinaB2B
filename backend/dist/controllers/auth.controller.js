@@ -127,6 +127,9 @@ async function register(req, res) {
             // Kunde über erfolgreiche Registrierung informieren
             try {
                 await (0, mailer_1.sendMail)(email, "Registrierung bei Lampadina", `<p>Hallo ${contactPerson},</p><p>vielen Dank für Ihre Registrierung bei Lampadina.</p><p>Wir prüfen Ihre Angaben und senden Ihnen in Kürze einen Freischaltlink.</p><p>Ihr Lampadina Team</p>`);
+
+                await (0, mailer_1.sendMail)("vertrieb@lampadina.icu", "Neue Kundenregistrierung", `<p>Es hat sich ein neuer Kunde registriert.</p><ul><li>Firma: ${companyName}</li><li>Ansprechpartner: ${contactPerson}</li><li>E-Mail: ${email}</li><li>Telefon: ${phone}</li></ul>`);
+
             }
             catch (e) {
                 console.error("register sendMail error:", e);
