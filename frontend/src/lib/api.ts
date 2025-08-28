@@ -175,6 +175,7 @@ export const Api = {
     });
   },
 
+
   // Kategorien
   listCategories() {
     return request<Category[]>("/categories");

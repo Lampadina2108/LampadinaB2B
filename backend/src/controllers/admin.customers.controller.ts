@@ -42,6 +42,7 @@ export async function approveCustomer(req: Request, res: Response) {
     await pool.query<ResultSetHeader>(
       `UPDATE customers
           SET approval_status='invited', activation_sent_at=NOW()
+
         WHERE id = ?`,
       [id]
     );
