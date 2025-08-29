@@ -42,6 +42,7 @@ const Products = __importStar(require("../controllers/products.controller"));
 const Categories = __importStar(require("../controllers/categories.controller"));
 const AdminCustomers = __importStar(require("../controllers/admin.customers.controller"));
 const Password = __importStar(require("../controllers/password.controller"));
+const HeroSlides = __importStar(require("../controllers/heroSlides.controller"));
 const router = (0, express_1.Router)();
 // sorgt dafür, dass req.user aus dem Cookie gesetzt wird
 router.use(auth_1.attachUser);
@@ -89,8 +90,8 @@ router.get("/products", (req, res, next) => {
         return res.status(501).json({ error: "products not implemented" });
     return fn(req, res, next);
 });
-// Hero-Slides (verhindert 404 im Frontend – gern später durch echten Controller ersetzen)
-router.get("/hero-slides", (_req, res) => res.json([]));
+// ---- Hero-Slides
+router.get("/hero-slides", HeroSlides.list);
 // ---- Admin: Kundenverwaltung
 router.get("/admin/customers", auth_1.requireAdmin, (req, res, next) => {
     var _a, _b, _c;
