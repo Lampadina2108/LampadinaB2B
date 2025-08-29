@@ -41,6 +41,7 @@ const Profile = __importStar(require("../controllers/profile.controller"));
 const Products = __importStar(require("../controllers/products.controller"));
 const Categories = __importStar(require("../controllers/categories.controller"));
 const AdminCustomers = __importStar(require("../controllers/admin.customers.controller"));
+const AdminProducts = __importStar(require("../controllers/admin.products.controller"));
 const Password = __importStar(require("../controllers/password.controller"));
 const HeroSlides = __importStar(require("../controllers/heroSlides.controller"));
 const router = (0, express_1.Router)();
@@ -90,6 +91,25 @@ router.get("/products", (req, res, next) => {
         return res.status(501).json({ error: "products not implemented" });
     return fn(req, res, next);
 });
+// Kategorie Shortcut
+router.get("/products/category/:slug", (req, res, next) => {
+    var _a, _b, _c, _d;
+    const p = Products;
+    const fn = (_d = (_c = (_b = (_a = p.listProducts) !== null && _a !== void 0 ? _a : p.list) !== null && _b !== void 0 ? _b : p.index) !== null && _c !== void 0 ? _c : p.search) !== null && _d !== void 0 ? _d : null;
+    if (!fn)
+        return res.status(501).json({ error: "products not implemented" });
+    req.query.category = req.params.slug;
+    return fn(req, res, next);
+});
+// Einzelnes Produkt
+router.get("/products/:id", (req, res, next) => {
+    var _a, _b, _c;
+    const p = Products;
+    const fn = (_c = (_b = (_a = p.get) !== null && _a !== void 0 ? _a : p.getProduct) !== null && _b !== void 0 ? _b : p.show) !== null && _c !== void 0 ? _c : null;
+    if (!fn)
+        return res.status(501).json({ error: "product detail not implemented" });
+    return fn(req, res, next);
+});
 // ---- Hero-Slides
 router.get("/hero-slides", HeroSlides.list);
 // ---- Admin: Kundenverwaltung
@@ -115,6 +135,71 @@ router.post("/admin/customers/:id/delete", auth_1.requireAdmin, (req, res, next)
     const fn = (_c = (_b = (_a = ctrl.deleteCustomer) !== null && _a !== void 0 ? _a : ctrl.remove) !== null && _b !== void 0 ? _b : ctrl.delete) !== null && _c !== void 0 ? _c : null;
     if (!fn)
         return res.status(501).json({ error: "deleteCustomer not implemented" });
+    return fn(req, res, next);
+});
+// ---- Admin: Produkte
+router.get("/admin/products", auth_1.requireAdmin, (req, res, next) => {
+    var _a, _b, _c;
+    const ctrl = AdminProducts;
+    const fn = (_c = (_b = (_a = ctrl.listProducts) !== null && _a !== void 0 ? _a : ctrl.list) !== null && _b !== void 0 ? _b : ctrl.index) !== null && _c !== void 0 ? _c : null;
+    if (!fn)
+        return res.status(501).json({ error: "listProducts not implemented" });
+    return fn(req, res, next);
+});
+router.post("/admin/products", auth_1.requireAdmin, (req, res, next) => {
+    var _a, _b;
+    const ctrl = AdminProducts;
+    const fn = (_b = (_a = ctrl.createProduct) !== null && _a !== void 0 ? _a : ctrl.create) !== null && _b !== void 0 ? _b : null;
+    if (!fn)
+        return res.status(501).json({ error: "createProduct not implemented" });
+    return fn(req, res, next);
+});
+router.put("/admin/products/:id", auth_1.requireAdmin, (req, res, next) => {
+    var _a, _b;
+    const ctrl = AdminProducts;
+    const fn = (_b = (_a = ctrl.updateProduct) !== null && _a !== void 0 ? _a : ctrl.update) !== null && _b !== void 0 ? _b : null;
+    if (!fn)
+        return res.status(501).json({ error: "updateProduct not implemented" });
+    return fn(req, res, next);
+});
+router.delete("/admin/products/:id", auth_1.requireAdmin, (req, res, next) => {
+    var _a, _b, _c;
+    const ctrl = AdminProducts;
+    const fn = (_c = (_b = (_a = ctrl.deleteProduct) !== null && _a !== void 0 ? _a : ctrl.remove) !== null && _b !== void 0 ? _b : ctrl.delete) !== null && _c !== void 0 ? _c : null;
+    if (!fn)
+        return res.status(501).json({ error: "deleteProduct not implemented" });
+    return fn(req, res, next);
+});
+router.post("/admin/products/:id/customer-price", auth_1.requireAdmin, (req, res, next) => {
+    var _a, _b;
+    const ctrl = AdminProducts;
+    const fn = (_b = (_a = ctrl.setCustomerPrice) !== null && _a !== void 0 ? _a : ctrl.setPrice) !== null && _b !== void 0 ? _b : null;
+    if (!fn)
+        return res.status(501).json({ error: "setCustomerPrice not implemented" });
+    return fn(req, res, next);
+});
+router.get("/admin/products/:id/customer-prices", auth_1.requireAdmin, (req, res, next) => {
+    var _a;
+    const ctrl = AdminProducts;
+    const fn = (_a = ctrl.listCustomerPrices) !== null && _a !== void 0 ? _a : null;
+    if (!fn)
+        return res.status(501).json({ error: "listCustomerPrices not implemented" });
+    return fn(req, res, next);
+});
+router.delete("/admin/products/:id/customer-price/:customerId", auth_1.requireAdmin, (req, res, next) => {
+    var _a;
+    const ctrl = AdminProducts;
+    const fn = (_a = ctrl.deleteCustomerPrice) !== null && _a !== void 0 ? _a : null;
+    if (!fn)
+        return res.status(501).json({ error: "deleteCustomerPrice not implemented" });
+    return fn(req, res, next);
+});
+router.get("/admin/attributes", auth_1.requireAdmin, (req, res, next) => {
+    var _a;
+    const ctrl = AdminProducts;
+    const fn = (_a = ctrl.listAttributes) !== null && _a !== void 0 ? _a : null;
+    if (!fn)
+        return res.status(501).json({ error: "listAttributes not implemented" });
     return fn(req, res, next);
 });
 exports.default = router;

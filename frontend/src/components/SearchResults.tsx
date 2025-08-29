@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { Api, formatPrice, toNum } from "../lib/api";
+import { useAuth } from "../contexts/AuthContext";
 
 type Product = {
   id: number;
@@ -15,6 +16,7 @@ export default function SearchResults() {
   const [items, setItems] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const { state } = useAuth();
 
   useEffect(() => {
     let alive = true;
@@ -64,7 +66,11 @@ export default function SearchResults() {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {items.map((p) => (
-          <article key={p.id} className="rounded border bg-white hover:shadow-sm transition p-3">
+          <Link
+            key={p.id}
+            to={`/product/${p.id}`}
+            className="rounded border bg-white hover:shadow-sm transition p-3 block"
+          >
             <div className="aspect-square w-full bg-slate-50 rounded flex items-center justify-center overflow-hidden">
               {p.image_url ? (
                 <img src={p.image_url} alt={p.name} className="object-contain w-full h-full" />
@@ -73,8 +79,14 @@ export default function SearchResults() {
               )}
             </div>
             <h3 className="mt-2 text-sm font-medium line-clamp-2">{p.name}</h3>
-            <div className="mt-2 font-semibold">{formatPrice(p.price)}</div>
-          </article>
+            {state.user ? (
+              <div className="mt-2 font-semibold">{formatPrice(p.price)}</div>
+            ) : (
+              <div className="mt-2 text-sm text-slate-500">
+                Preis nur für angemeldete Benutzer
+              </div>
+            )}
+          </Link>
         ))}
       </div>
     </div>
