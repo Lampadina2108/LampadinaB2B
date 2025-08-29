@@ -1,6 +1,6 @@
 // src/contexts/AuthContext.tsx
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { Api, clearToken, getToken, saveToken } from "../lib/api";
+import { Api, clearToken, saveToken } from "../lib/api";
 
 type User = { id: number; email: string; role: string } | null;
 
@@ -32,11 +32,9 @@ const AuthContext = createContext<Ctx | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<State>({ user: null, isLoading: false, error: undefined });
 
-  // Me beim Laden (falls Token da)
+  // Beim Laden prüfen, ob eine Session (Cookie oder Token) existiert
   useEffect(() => {
     (async () => {
-      const tok = getToken();
-      if (!tok) return;
       setState((s) => ({ ...s, isLoading: true }));
       try {
         const me = await Api.me();

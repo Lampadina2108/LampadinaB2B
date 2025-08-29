@@ -1,8 +1,8 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, Link, useSearchParams } from "react-router-dom";
-import { Search, ArrowLeft } from "lucide-react";
-import useCart from "../hooks/useCartSafe";
+import { ArrowLeft } from "lucide-react";
 import { Api, formatPrice, toNum } from "../lib/api";
+import { useAuth } from "../contexts/AuthContext";
 
 type Category = { id: number; slug: string; name: string };
 type Product = {
@@ -21,6 +21,7 @@ export default function CategoryPage() {
   const [items, setItems] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const { state } = useAuth();
 
   const page = Number(sp.get("page") || 1);
   const sort = sp.get("sort") || "name:asc";
@@ -81,7 +82,11 @@ export default function CategoryPage() {
       {/* Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {items.map((p) => (
-          <article key={p.id} className="rounded border bg-white hover:shadow-sm transition p-3">
+          <Link
+            key={p.id}
+            to={`/product/${p.id}`}
+            className="rounded border bg-white hover:shadow-sm transition p-3 block"
+          >
             <div className="aspect-square w-full bg-slate-50 rounded flex items-center justify-center overflow-hidden">
               {p.image_url ? (
                 <img
@@ -96,9 +101,15 @@ export default function CategoryPage() {
             </div>
             <h3 className="mt-2 text-sm font-medium line-clamp-2">{p.name}</h3>
             <div className="mt-1 text-[13px] text-slate-500">{p.sku ?? ""}</div>
-            <div className="mt-2 font-semibold">{formatPrice(p.price)}</div>
+            {state.user ? (
+              <div className="mt-2 font-semibold">{formatPrice(p.price)}</div>
+            ) : (
+              <div className="mt-2 text-sm text-slate-500">
+                Preis nur für angemeldete Benutzer
+              </div>
+            )}
             {p.unit && <div className="text-xs text-slate-500">/{p.unit}</div>}
-          </article>
+          </Link>
         ))}
       </div>
     </div>
