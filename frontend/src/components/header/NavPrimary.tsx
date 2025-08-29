@@ -1,6 +1,7 @@
 // src/components/header/NavPrimary.tsx
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { ChevronDown } from "lucide-react";
 
 export type Cat = { id: number; slug: string; name: string };
 
@@ -45,20 +46,25 @@ export default function NavPrimary({ cats }: Props) {
               type="button"
               aria-haspopup="true"
               aria-expanded={open}
-              className={`px-1 py-2 outline-none ${
-                open ? "text-neutral-900" : "text-neutral-700"
-              } hover:text-neutral-900`}
+              className={`flex items-center gap-1 rounded-md px-3 py-2 transition-colors outline-none ${
+                open
+                  ? "bg-neutral-100 text-neutral-900"
+                  : "text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900"
+              }`}
               onClick={() => setOpen((v) => !v)}
               onFocus={openWithDelay}
               onBlur={closeWithDelay}
             >
-              Kategorien <span className="ml-1">▾</span>
+              <span>Kategorien</span>
+              <ChevronDown
+                className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`}
+              />
             </button>
 
             {/* Dropdown */}
             {open && (
               <div
-                className="absolute left-0 top-full z-40 w-[780px] max-w-[calc(100vw-2rem)] translate-y-2 rounded-xl border border-neutral-200 bg-white shadow-xl"
+                className="absolute left-0 top-full z-40 mt-2 w-[780px] max-w-[calc(100vw-2rem)] rounded-xl border border-neutral-200 bg-white shadow-xl ring-1 ring-black/5"
                 onMouseEnter={openWithDelay}
                 onMouseLeave={closeWithDelay}
               >
@@ -73,7 +79,7 @@ export default function NavPrimary({ cats }: Props) {
                         <Link
                           key={c.id}
                           to={`/category/${c.slug}`}
-                          className="group flex flex-col rounded-lg border border-neutral-200 hover:border-neutral-300 focus:ring-2 focus:ring-black/10"
+                          className="group flex flex-col rounded-lg border border-neutral-200 transition-colors hover:border-neutral-300 hover:bg-neutral-50 focus:ring-2 focus:ring-black/10"
                           onClick={() => setOpen(false)}
                         >
                           <div className="aspect-[4/3] w-full overflow-hidden rounded-t-lg bg-neutral-50">

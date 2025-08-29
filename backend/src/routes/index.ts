@@ -7,6 +7,7 @@ import * as Profile from "../controllers/profile.controller";
 import * as Products from "../controllers/products.controller";
 import * as Categories from "../controllers/categories.controller";
 import * as AdminCustomers from "../controllers/admin.customers.controller";
+import * as Password from "../controllers/password.controller";
 
 const router = Router();
 
@@ -36,6 +37,10 @@ router.post("/auth/register", (req, res, next) => {
 
 router.get("/auth/me", requireAuth, Auth.me);
 
+// Passwort setzen / validieren
+router.get("/auth/password/validate", Password.validatePasswordToken);
+router.post("/auth/password/set", Password.setPassword);
+
 // ---- Profil (liefert user + customer)
 router.get("/profile", requireAuth, Profile.getProfile);
 
@@ -44,6 +49,14 @@ router.get("/categories", (req, res, next) => {
   const c: any = Categories;
   const fn = c.list ?? c.listCategories ?? c.index;
   return fn ? fn(req, res, next) : res.json([]);
+});
+
+// Einzelne Kategorie nach Slug
+router.get("/categories/:slug", (req, res, next) => {
+  const c: any = Categories;
+  const fn = c.getBySlug ?? c.get ?? c.getCategory ?? null;
+  if (!fn) return res.status(404).json({ error: "not found" });
+  return fn(req, res, next);
 });
 
 // ---- Produkte (listProducts / list / index / search – nimm was vorhanden ist)

@@ -34,11 +34,13 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.login = login;
+exports.register = register;
 exports.me = me;
 exports.logout = logout;
 const db_1 = require("../db");
 const bcrypt = __importStar(require("bcrypt")); // kompatibel mit CJS/ESM
 const auth_1 = require("../middleware/auth");
+const mailer_1 = require("../utils/mailer");
 async function login(req, res) {
     var _a;
     try {
@@ -58,6 +60,94 @@ async function login(req, res) {
     }
     catch (err) {
         console.error("auth.login error:", err);
+        return res.status(500).json({ error: "internal error" });
+    }
+}
+async function register(req, res) {
+    var _a, _b;
+    try {
+        const { companyName, contactPerson, email, phone, address, vatNumber, companyRegister, } = (_a = req.body) !== null && _a !== void 0 ? _a : {};
+        if (!companyName ||
+            !contactPerson ||
+            !email ||
+            !phone ||
+            !(address === null || address === void 0 ? void 0 : address.street) ||
+            !(address === null || address === void 0 ? void 0 : address.zipCode) ||
+            !(address === null || address === void 0 ? void 0 : address.city)) {
+            return res.status(400).json({ error: "missing fields" });
+        }
+        const conn = await db_1.pool.getConnection();
+        try {
+            await conn.beginTransaction();
+            const pwHash = await bcrypt.hash(Math.random().toString(36).slice(2), 10);
+            const [uRes] = await conn.query(
+            // Die Users-Tabelle erlaubt nur die Rollen 'admin' und 'user'
+            // daher registrieren wir neue Nutzer immer als normalen 'user'
+            "INSERT INTO users (email, password_hash, role) VALUES (?, ?, 'user')", [email, pwHash]);
+            const userId = uRes.insertId;
+            // ermittele vorhandene Spalten der Kundentabelle
+            const [cols] = await conn.query("SHOW COLUMNS FROM customers");
+            const available = new Set(cols.map((c) => c.Field));
+            const customer = {
+                user_id: userId,
+                company_name: companyName,
+                contact_person: contactPerson,
+                phone,
+            };
+            if (available.has("vat_number") && vatNumber)
+                customer.vat_number = vatNumber;
+            // Einige Datenbanken verwenden 'company_register_no' statt 'company_register'
+            if (available.has("company_register_no") && companyRegister)
+                customer.company_register_no = companyRegister;
+            else if (available.has("company_register") && companyRegister)
+                customer.company_register = companyRegister;
+            if (available.has("address_line1"))
+                customer.address_line1 = address.street;
+            else if (available.has("street"))
+                customer.street = address.street;
+            else if (available.has("address"))
+                customer.address = address.street;
+            const zip = address.zipCode;
+            if (available.has("postal_code"))
+                customer.postal_code = zip;
+            else if (available.has("zip_code"))
+                customer.zip_code = zip;
+            else if (available.has("zip"))
+                customer.zip = zip;
+            if (available.has("city"))
+                customer.city = address.city;
+            if (available.has("country"))
+                customer.country = (_b = address.country) !== null && _b !== void 0 ? _b : "AT";
+            if (available.has("approval_status"))
+                customer.approval_status = "pending";
+            if (available.has("created_at"))
+                customer.created_at = new Date();
+            await conn.query("INSERT INTO customers SET ?", customer);
+            await conn.commit();
+            // Kunde über erfolgreiche Registrierung informieren
+            try {
+                await (0, mailer_1.sendMail)(email, "Registrierung bei Lampadina", `<p>Hallo ${contactPerson},</p><p>vielen Dank für Ihre Registrierung bei Lampadina.</p><p>Wir prüfen Ihre Angaben und senden Ihnen in Kürze einen Freischaltlink.</p><p>Ihr Lampadina Team</p>`);
+                // zusätzlich das Vertriebsteam informieren
+                await (0, mailer_1.sendMail)("vertrieb@lampadina.icu", "Neue Kundenregistrierung", `<p>Es hat sich ein neuer Kunde registriert.</p><ul><li>Firma: ${companyName}</li><li>Ansprechpartner: ${contactPerson}</li><li>E-Mail: ${email}</li><li>Telefon: ${phone}</li></ul>`);
+            }
+            catch (e) {
+                console.error("register sendMail error:", e);
+            }
+            return res.json({ ok: true });
+        }
+        catch (err) {
+            await conn.rollback();
+            if ((err === null || err === void 0 ? void 0 : err.code) === "ER_DUP_ENTRY") {
+                return res.status(409).json({ error: "email already registered" });
+            }
+            throw err;
+        }
+        finally {
+            conn.release();
+        }
+    }
+    catch (err) {
+        console.error("auth.register error:", err);
         return res.status(500).json({ error: "internal error" });
     }
 }

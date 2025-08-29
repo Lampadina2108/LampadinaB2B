@@ -41,6 +41,7 @@ const Profile = __importStar(require("../controllers/profile.controller"));
 const Products = __importStar(require("../controllers/products.controller"));
 const Categories = __importStar(require("../controllers/categories.controller"));
 const AdminCustomers = __importStar(require("../controllers/admin.customers.controller"));
+const Password = __importStar(require("../controllers/password.controller"));
 const router = (0, express_1.Router)();
 // sorgt dafür, dass req.user aus dem Cookie gesetzt wird
 router.use(auth_1.attachUser);
@@ -58,6 +59,9 @@ router.post("/auth/register", (req, res, next) => {
     return fn(req, res, next);
 });
 router.get("/auth/me", auth_1.requireAuth, Auth.me);
+// Passwort setzen / validieren
+router.get("/auth/password/validate", Password.validatePasswordToken);
+router.post("/auth/password/set", Password.setPassword);
 // ---- Profil (liefert user + customer)
 router.get("/profile", auth_1.requireAuth, Profile.getProfile);
 // ---- Kategorien (bei dir heißt die Funktion meist list oder listCategories)
@@ -66,6 +70,15 @@ router.get("/categories", (req, res, next) => {
     const c = Categories;
     const fn = (_b = (_a = c.list) !== null && _a !== void 0 ? _a : c.listCategories) !== null && _b !== void 0 ? _b : c.index;
     return fn ? fn(req, res, next) : res.json([]);
+});
+// Einzelne Kategorie nach Slug
+router.get("/categories/:slug", (req, res, next) => {
+    var _a, _b, _c;
+    const c = Categories;
+    const fn = (_c = (_b = (_a = c.getBySlug) !== null && _a !== void 0 ? _a : c.get) !== null && _b !== void 0 ? _b : c.getCategory) !== null && _c !== void 0 ? _c : null;
+    if (!fn)
+        return res.status(404).json({ error: "not found" });
+    return fn(req, res, next);
 });
 // ---- Produkte (listProducts / list / index / search – nimm was vorhanden ist)
 router.get("/products", (req, res, next) => {
