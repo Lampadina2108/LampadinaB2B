@@ -268,3 +268,4 @@ export const AdminApi = {
 
 // Default-Export zusätzlich anbieten, falls irgendwo "import Api from ..." genutzt wird
 export default Api;
+

@@ -33,22 +33,7 @@ router.post("/auth/register", (req, res, next) => {
     a.signup ??
     a.create ??
     null;
-  if (!fn) return res.status(501).json({ error: "register not implemented" });
-  return fn(req, res, next);
-});
-
-router.get("/auth/me", requireAuth, Auth.me);
-
-// Passwort setzen / validieren
-router.get("/auth/password/validate", Password.validatePasswordToken);
-router.post("/auth/password/set", Password.setPassword);
-
-// ---- Profil (liefert user + customer)
-router.get("/profile", requireAuth, Profile.getProfile);
-
-// ---- Kategorien (bei dir heißt die Funktion meist list oder listCategories)
-router.get("/categories", (req, res, next) => {
-  const c: any = Categories;
+@@ -51,74 +52,165 @@ router.get("/categories", (req, res, next) => {
   const fn = c.list ?? c.listCategories ?? c.index;
   return fn ? fn(req, res, next) : res.json([]);
 });

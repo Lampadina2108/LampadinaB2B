@@ -1,205 +1,201 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-const auth_1 = require("../auth");
+import { Router } from "express";
+import { attachUser, requireAuth, requireAdmin } from "../auth";
+
 // Controller (so wie sie aktuell bei dir heißen)
-const Auth = __importStar(require("../controllers/auth.controller"));
-const Profile = __importStar(require("../controllers/profile.controller"));
-const Products = __importStar(require("../controllers/products.controller"));
-const Categories = __importStar(require("../controllers/categories.controller"));
-const AdminCustomers = __importStar(require("../controllers/admin.customers.controller"));
-const AdminProducts = __importStar(require("../controllers/admin.products.controller"));
-const Password = __importStar(require("../controllers/password.controller"));
-const HeroSlides = __importStar(require("../controllers/heroSlides.controller"));
-const router = (0, express_1.Router)();
+import * as Auth from "../controllers/auth.controller";
+import * as Profile from "../controllers/profile.controller";
+import * as Products from "../controllers/products.controller";
+import * as Categories from "../controllers/categories.controller";
+import * as AdminCustomers from "../controllers/admin.customers.controller";
+import * as AdminProducts from "../controllers/admin.products.controller";
+import * as Password from "../controllers/password.controller";
+import * as HeroSlides from "../controllers/heroSlides.controller";
+
+const router = Router();
+
 // sorgt dafür, dass req.user aus dem Cookie gesetzt wird
-router.use(auth_1.attachUser);
+router.use(attachUser);
+
 // ---- Health
-router.get("/health", (_req, res) => res.json({ ok: true, ts: new Date().toISOString() }));
+router.get("/health", (_req, res) =>
+  res.json({ ok: true, ts: new Date().toISOString() })
+);
+
 // ---- Auth
 router.post("/auth/login", Auth.login);
+
 // Fallback: nimm, was der Auth-Controller tatsächlich exportiert (register / registerUser / signup / create)
 router.post("/auth/register", (req, res, next) => {
-    var _a, _b, _c, _d;
-    const a = Auth;
-    const fn = (_d = (_c = (_b = (_a = a.register) !== null && _a !== void 0 ? _a : a.registerUser) !== null && _b !== void 0 ? _b : a.signup) !== null && _c !== void 0 ? _c : a.create) !== null && _d !== void 0 ? _d : null;
-    if (!fn)
-        return res.status(501).json({ error: "register not implemented" });
-    return fn(req, res, next);
+  const a: any = Auth;
+  const fn =
+    a.register ??
+    a.registerUser ??
+    a.signup ??
+    a.create ??
+    null;
+@@ -51,74 +52,165 @@ router.get("/categories", (req, res, next) => {
+  const fn = c.list ?? c.listCategories ?? c.index;
+  return fn ? fn(req, res, next) : res.json([]);
 });
-router.get("/auth/me", auth_1.requireAuth, Auth.me);
-// Passwort setzen / validieren
-router.get("/auth/password/validate", Password.validatePasswordToken);
-router.post("/auth/password/set", Password.setPassword);
-// ---- Profil (liefert user + customer)
-router.get("/profile", auth_1.requireAuth, Profile.getProfile);
-// ---- Kategorien (bei dir heißt die Funktion meist list oder listCategories)
-router.get("/categories", (req, res, next) => {
-    var _a, _b;
-    const c = Categories;
-    const fn = (_b = (_a = c.list) !== null && _a !== void 0 ? _a : c.listCategories) !== null && _b !== void 0 ? _b : c.index;
-    return fn ? fn(req, res, next) : res.json([]);
-});
+
 // Einzelne Kategorie nach Slug
 router.get("/categories/:slug", (req, res, next) => {
-    var _a, _b, _c;
-    const c = Categories;
-    const fn = (_c = (_b = (_a = c.getBySlug) !== null && _a !== void 0 ? _a : c.get) !== null && _b !== void 0 ? _b : c.getCategory) !== null && _c !== void 0 ? _c : null;
-    if (!fn)
-        return res.status(404).json({ error: "not found" });
-    return fn(req, res, next);
+  const c: any = Categories;
+  const fn = c.getBySlug ?? c.get ?? c.getCategory ?? null;
+  if (!fn) return res.status(404).json({ error: "not found" });
+  return fn(req, res, next);
 });
+
 // ---- Produkte (listProducts / list / index / search – nimm was vorhanden ist)
 router.get("/products", (req, res, next) => {
-    var _a, _b, _c, _d;
-    const p = Products;
-    const fn = (_d = (_c = (_b = (_a = p.listProducts) !== null && _a !== void 0 ? _a : p.list) !== null && _b !== void 0 ? _b : p.index) !== null && _c !== void 0 ? _c : p.search) !== null && _d !== void 0 ? _d : null;
-    if (!fn)
-        return res.status(501).json({ error: "products not implemented" });
-    return fn(req, res, next);
+  const p: any = Products;
+  const fn =
+    p.listProducts ??
+    p.list ??
+    p.index ??
+    p.search ??
+    null;
+  if (!fn) return res.status(501).json({ error: "products not implemented" });
+  return fn(req, res, next);
 });
+
 // Kategorie Shortcut
 router.get("/products/category/:slug", (req, res, next) => {
-    var _a, _b, _c, _d;
-    const p = Products;
-    const fn = (_d = (_c = (_b = (_a = p.listProducts) !== null && _a !== void 0 ? _a : p.list) !== null && _b !== void 0 ? _b : p.index) !== null && _c !== void 0 ? _c : p.search) !== null && _d !== void 0 ? _d : null;
-    if (!fn)
-        return res.status(501).json({ error: "products not implemented" });
-    req.query.category = req.params.slug;
-    return fn(req, res, next);
+  const p: any = Products;
+  const fn =
+    p.listProducts ??
+    p.list ??
+    p.index ??
+    p.search ??
+    null;
+  if (!fn) return res.status(501).json({ error: "products not implemented" });
+  req.query.category = req.params.slug;
+  return fn(req, res, next);
 });
+
 // Einzelnes Produkt
 router.get("/products/:id", (req, res, next) => {
-    var _a, _b, _c;
-    const p = Products;
-    const fn = (_c = (_b = (_a = p.get) !== null && _a !== void 0 ? _a : p.getProduct) !== null && _b !== void 0 ? _b : p.show) !== null && _c !== void 0 ? _c : null;
-    if (!fn)
-        return res.status(501).json({ error: "product detail not implemented" });
-    return fn(req, res, next);
+  const p: any = Products;
+  const fn = p.get ?? p.getProduct ?? p.show ?? null;
+  if (!fn) return res.status(501).json({ error: "product detail not implemented" });
+  return fn(req, res, next);
 });
+
 // ---- Hero-Slides
 router.get("/hero-slides", HeroSlides.list);
+
 // ---- Admin: Kundenverwaltung
-router.get("/admin/customers", auth_1.requireAdmin, (req, res, next) => {
-    var _a, _b, _c;
-    const ctrl = AdminCustomers;
-    const fn = (_c = (_b = (_a = ctrl.listCustomers) !== null && _a !== void 0 ? _a : ctrl.list) !== null && _b !== void 0 ? _b : ctrl.index) !== null && _c !== void 0 ? _c : null;
-    if (!fn)
-        return res.status(501).json({ error: "listCustomers not implemented" });
+router.get(
+  "/admin/customers",
+  requireAdmin,
+  (req, res, next) => {
+    const ctrl: any = AdminCustomers;
+    const fn =
+      ctrl.listCustomers ??
+      ctrl.list ??
+      ctrl.index ??
+      null;
+    if (!fn) return res.status(501).json({ error: "listCustomers not implemented" });
     return fn(req, res, next);
-});
-router.post("/admin/customers/:id/approve", auth_1.requireAdmin, (req, res, next) => {
-    var _a, _b;
-    const ctrl = AdminCustomers;
-    const fn = (_b = (_a = ctrl.approveCustomer) !== null && _a !== void 0 ? _a : ctrl.approve) !== null && _b !== void 0 ? _b : null;
-    if (!fn)
-        return res.status(501).json({ error: "approveCustomer not implemented" });
+  }
+);
+
+router.post(
+  "/admin/customers/:id/approve",
+  requireAdmin,
+  (req, res, next) => {
+    const ctrl: any = AdminCustomers;
+    const fn =
+      ctrl.approveCustomer ??
+      ctrl.approve ??
+      null;
+    if (!fn) return res.status(501).json({ error: "approveCustomer not implemented" });
     return fn(req, res, next);
-});
-router.post("/admin/customers/:id/delete", auth_1.requireAdmin, (req, res, next) => {
-    var _a, _b, _c;
-    const ctrl = AdminCustomers;
-    const fn = (_c = (_b = (_a = ctrl.deleteCustomer) !== null && _a !== void 0 ? _a : ctrl.remove) !== null && _b !== void 0 ? _b : ctrl.delete) !== null && _c !== void 0 ? _c : null;
-    if (!fn)
-        return res.status(501).json({ error: "deleteCustomer not implemented" });
+  }
+);
+
+router.post(
+  "/admin/customers/:id/delete",
+  requireAdmin,
+  (req, res, next) => {
+    const ctrl: any = AdminCustomers;
+    const fn =
+      ctrl.deleteCustomer ??
+      ctrl.remove ??
+      ctrl.delete ??
+      null;
+    if (!fn) return res.status(501).json({ error: "deleteCustomer not implemented" });
     return fn(req, res, next);
-});
+  }
+);
+
 // ---- Admin: Produkte
-router.get("/admin/products", auth_1.requireAdmin, (req, res, next) => {
-    var _a, _b, _c;
-    const ctrl = AdminProducts;
-    const fn = (_c = (_b = (_a = ctrl.listProducts) !== null && _a !== void 0 ? _a : ctrl.list) !== null && _b !== void 0 ? _b : ctrl.index) !== null && _c !== void 0 ? _c : null;
-    if (!fn)
-        return res.status(501).json({ error: "listProducts not implemented" });
-    return fn(req, res, next);
+router.get("/admin/products", requireAdmin, (req, res, next) => {
+  const ctrl: any = AdminProducts;
+  const fn = ctrl.listProducts ?? ctrl.list ?? ctrl.index ?? null;
+  if (!fn) return res.status(501).json({ error: "listProducts not implemented" });
+  return fn(req, res, next);
 });
-router.post("/admin/products", auth_1.requireAdmin, (req, res, next) => {
-    var _a, _b;
-    const ctrl = AdminProducts;
-    const fn = (_b = (_a = ctrl.createProduct) !== null && _a !== void 0 ? _a : ctrl.create) !== null && _b !== void 0 ? _b : null;
-    if (!fn)
-        return res.status(501).json({ error: "createProduct not implemented" });
-    return fn(req, res, next);
+
+router.post("/admin/products", requireAdmin, (req, res, next) => {
+  const ctrl: any = AdminProducts;
+  const fn = ctrl.createProduct ?? ctrl.create ?? null;
+  if (!fn) return res.status(501).json({ error: "createProduct not implemented" });
+  return fn(req, res, next);
 });
-router.put("/admin/products/:id", auth_1.requireAdmin, (req, res, next) => {
-    var _a, _b;
-    const ctrl = AdminProducts;
-    const fn = (_b = (_a = ctrl.updateProduct) !== null && _a !== void 0 ? _a : ctrl.update) !== null && _b !== void 0 ? _b : null;
-    if (!fn)
-        return res.status(501).json({ error: "updateProduct not implemented" });
-    return fn(req, res, next);
+
+router.put("/admin/products/:id", requireAdmin, (req, res, next) => {
+  const ctrl: any = AdminProducts;
+  const fn = ctrl.updateProduct ?? ctrl.update ?? null;
+  if (!fn) return res.status(501).json({ error: "updateProduct not implemented" });
+  return fn(req, res, next);
 });
-router.delete("/admin/products/:id", auth_1.requireAdmin, (req, res, next) => {
-    var _a, _b, _c;
-    const ctrl = AdminProducts;
-    const fn = (_c = (_b = (_a = ctrl.deleteProduct) !== null && _a !== void 0 ? _a : ctrl.remove) !== null && _b !== void 0 ? _b : ctrl.delete) !== null && _c !== void 0 ? _c : null;
-    if (!fn)
-        return res.status(501).json({ error: "deleteProduct not implemented" });
-    return fn(req, res, next);
+
+router.delete("/admin/products/:id", requireAdmin, (req, res, next) => {
+  const ctrl: any = AdminProducts;
+  const fn = ctrl.deleteProduct ?? ctrl.remove ?? ctrl.delete ?? null;
+  if (!fn) return res.status(501).json({ error: "deleteProduct not implemented" });
+  return fn(req, res, next);
 });
-router.post("/admin/products/:id/customer-price", auth_1.requireAdmin, (req, res, next) => {
-    var _a, _b;
-    const ctrl = AdminProducts;
-    const fn = (_b = (_a = ctrl.setCustomerPrice) !== null && _a !== void 0 ? _a : ctrl.setPrice) !== null && _b !== void 0 ? _b : null;
-    if (!fn)
-        return res.status(501).json({ error: "setCustomerPrice not implemented" });
+
+router.post(
+  "/admin/products/:id/customer-price",
+  requireAdmin,
+  (req, res, next) => {
+    const ctrl: any = AdminProducts;
+    const fn = ctrl.setCustomerPrice ?? ctrl.setPrice ?? null;
+    if (!fn) return res.status(501).json({ error: "setCustomerPrice not implemented" });
     return fn(req, res, next);
-});
-router.get("/admin/products/:id/customer-prices", auth_1.requireAdmin, (req, res, next) => {
-    var _a;
-    const ctrl = AdminProducts;
-    const fn = (_a = ctrl.listCustomerPrices) !== null && _a !== void 0 ? _a : null;
-    if (!fn)
-        return res.status(501).json({ error: "listCustomerPrices not implemented" });
+  }
+);
+
+router.get(
+  "/admin/products/:id/customer-prices",
+  requireAdmin,
+  (req, res, next) => {
+    const ctrl: any = AdminProducts;
+    const fn = ctrl.listCustomerPrices ?? null;
+    if (!fn) return res.status(501).json({ error: "listCustomerPrices not implemented" });
     return fn(req, res, next);
-});
-router.delete("/admin/products/:id/customer-price/:customerId", auth_1.requireAdmin, (req, res, next) => {
-    var _a;
-    const ctrl = AdminProducts;
-    const fn = (_a = ctrl.deleteCustomerPrice) !== null && _a !== void 0 ? _a : null;
-    if (!fn)
-        return res.status(501).json({ error: "deleteCustomerPrice not implemented" });
+  }
+);
+
+router.delete(
+  "/admin/products/:id/customer-price/:customerId",
+  requireAdmin,
+  (req, res, next) => {
+    const ctrl: any = AdminProducts;
+    const fn = ctrl.deleteCustomerPrice ?? null;
+    if (!fn) return res.status(501).json({ error: "deleteCustomerPrice not implemented" });
     return fn(req, res, next);
+  }
+);
+
+router.get("/admin/attributes", requireAdmin, (req, res, next) => {
+  const ctrl: any = AdminProducts;
+  const fn = ctrl.listAttributes ?? null;
+  if (!fn) return res.status(501).json({ error: "listAttributes not implemented" });
+  return fn(req, res, next);
 });
-router.get("/admin/attributes", auth_1.requireAdmin, (req, res, next) => {
-    var _a;
-    const ctrl = AdminProducts;
-    const fn = (_a = ctrl.listAttributes) !== null && _a !== void 0 ? _a : null;
-    if (!fn)
-        return res.status(501).json({ error: "listAttributes not implemented" });
-    return fn(req, res, next);
-});
-exports.default = router;
+
+export default router;
