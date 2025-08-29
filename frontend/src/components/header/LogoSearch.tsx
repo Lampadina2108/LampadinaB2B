@@ -1,5 +1,5 @@
 // src/components/header/LogoSearch.tsx
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingCart } from "lucide-react";
 import ProfileMenu from "./ProfileMenu";
@@ -50,10 +50,20 @@ export default function LogoSearch({
 }: Props) {
   // Profil-Menü lokal steuern (Anchor ist der „Mein Lampadina“-Button)
   const [openProfile, setOpenProfile] = useState(false);
-  const profileBtnRef = useRef<HTMLButtonElement | null>(null);
+  const profileRef = useRef<HTMLDivElement | null>(null);
 
   const isLoggedIn = !!auth?.user;
   const cartBadge = useMemo(() => (cartCount > 99 ? "99+" : cartCount), [cartCount]);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setOpenProfile(false);
+      }
+    }
+    if (openProfile) document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, [openProfile]);
 
   return (
     <header className="bg-white">
@@ -108,13 +118,9 @@ export default function LogoSearch({
             </button>
           </div>
         ) : (
-          <div
-            className="relative"
-            onMouseEnter={() => setOpenProfile(true)}
-            onMouseLeave={() => setOpenProfile(false)}
-          >
+          <div className="relative" ref={profileRef}>
             <button
-              ref={profileBtnRef}
+              onClick={() => setOpenProfile((o) => !o)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg border hover:bg-gray-100 text-sm"
             >
               <img src="/uploads/logo_sw.svg" alt="" className="h-4" />
@@ -123,11 +129,8 @@ export default function LogoSearch({
 
             <ProfileMenu
               open={openProfile}
-              anchorEl={profileBtnRef.current}
               onClose={() => setOpenProfile(false)}
               onLogout={onLogout}
-              onOpenLogin={onOpenLogin}
-              onOpenRegister={onOpenRegister}
               profile={profile}
             />
           </div>

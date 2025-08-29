@@ -31,8 +31,14 @@ export function clearToken() {
 export function toNum(input: any, fallback = 0): number {
   if (typeof input === "number" && isFinite(input)) return input;
   if (typeof input === "string") {
-    // Komma zulassen (EU-Format)
-    const s = input.replace(/\./g, "").replace(",", ".");
+    let s = input.trim();
+    // Wenn sowohl Komma als auch Punkt vorkommen → Punkt als Tausendertrennzeichen entfernen
+    if (s.includes(",") && s.includes(".")) {
+      s = s.replace(/\./g, "").replace(",", ".");
+    } else {
+      // Ansonsten nur Komma in Punkt umwandeln
+      s = s.replace(",", ".");
+    }
     const n = Number(s);
     return isFinite(n) ? n : fallback;
   }
@@ -223,13 +229,31 @@ export const Api = {
 // Optionaler Admin-Wrapper (für bestehende Imports)
 export const AdminApi = {
   listCustomers() {
-    return request<{ list: any[] }>("/admin/customers");
+    return request<any[]>("/admin/customers");
   },
   approveAndInvite(id: number) {
     return request(`/admin/customers/${id}/approve`, { method: "POST" });
   },
   deleteCustomer(id: number) {
     return request(`/admin/customers/${id}/delete`, { method: "POST" });
+  },
+  listProducts() {
+    return request<any[]>("/admin/products");
+  },
+  createProduct(data: any) {
+    return request("/admin/products", { method: "POST", body: JSON.stringify(data) });
+  },
+  updateProduct(id: number, data: any) {
+    return request(`/admin/products/${id}`, { method: "PUT", body: JSON.stringify(data) });
+  },
+  deleteProduct(id: number) {
+    return request(`/admin/products/${id}`, { method: "DELETE" });
+  },
+  setCustomerPrice(productId: number, customerId: number, price: number) {
+    return request(`/admin/products/${productId}/customer-price`, {
+      method: "POST",
+      body: JSON.stringify({ customerId, price }),
+    });
   },
 };
 

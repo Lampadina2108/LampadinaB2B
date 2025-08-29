@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import { pool } from "../db";
 import type { RowDataPacket } from "mysql2/promise";
 import type { AuthedRequest } from "../auth";
@@ -39,7 +39,7 @@ function parseSort(raw: string | undefined) {
  *  - page (default 1), pageSize (default 24, max 100)
  *  - sort: name:asc | price:desc | created_at:asc
  */
-export async function list(req: Request, res: Response) {
+export async function list(req: AuthedRequest, res: Response) {
   try {
     const page = Math.max(parseInt(String(req.query.page ?? "1"), 10) || 1, 1);
     const pageSize = Math.min(
@@ -73,28 +73,38 @@ export async function list(req: Request, res: Response) {
     const [cntRows] = await pool.query<RowDataPacket[]>(sqlCount, params);
     const total = Number((cntRows[0] as any)?.cnt ?? 0);
 
+    let priceSelect = "NULL AS price";
+    let joinPrice = "";
+    const finalParams = [...params];
+    if (req.user) {
+      priceSelect = "COALESCE(cp.special_price, p.price) AS price";
+      joinPrice =
+        " LEFT JOIN customers c ON c.user_id = ? LEFT JOIN customer_prices cp ON cp.product_id = p.id AND cp.customer_id = c.id";
+      finalParams.push(req.user.id);
+    }
+
     const sqlData = `
       SELECT
         p.id, p.sku, p.name, p.category_slug, p.brand, p.description,
-        p.price, p.stock_quantity, p.created_at,
+        ${priceSelect}, p.stock_quantity, p.created_at,
         COALESCE(
           MAX(CASE WHEN i.is_primary = 1 THEN i.image_url END),
           MAX(i.image_url)
         ) AS image_url
       FROM products p
       LEFT JOIN product_images i ON i.product_id = p.id
+      ${joinPrice}
       ${whereSql}
       GROUP BY p.id
       ORDER BY ${orderBy}
       LIMIT ? OFFSET ?`;
 
-    const [rows] = await pool.query<ProductRowPacket[]>(
-      sqlData,
-      [...params, pageSize, offset]
-    );
+    finalParams.push(pageSize, offset);
+    const [rows] = await pool.query<ProductRowPacket[]>(sqlData, finalParams);
 
-    // rows ist bereits typisiert, nur sauber als JSON zurückgeben
-    res.json({ items: rows, total, page, pageSize });
+    // Wenn kein User eingeloggt ist, sicherstellen, dass Preis null ist
+    const items = rows.map((r) => ({ ...r, price: req.user ? r.price : null }));
+    res.json({ items, total, page, pageSize });
   } catch (err) {
     console.error("products.list error:", err);
     res.status(500).json({ error: "internal error" });

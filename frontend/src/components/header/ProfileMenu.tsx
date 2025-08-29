@@ -31,10 +31,7 @@ export default function ProfileMenu({ open, onClose, onLogout, profile }: Props)
   const customer = profile?.customer ?? null;
 
   return (
-    <div
-      className="absolute right-0 mt-2 w-[760px] z-50"
-      onMouseLeave={onClose}
-    >
+    <div className="absolute right-0 mt-2 w-[760px] z-50">
       <div className="bg-white border rounded-xl shadow-xl p-5 grid grid-cols-2 gap-4">
         {/* Linke Spalte: persönlicher Kontakt + Logo-Feld */}
         <div className="space-y-4">
@@ -94,14 +91,24 @@ export default function ProfileMenu({ open, onClose, onLogout, profile }: Props)
             <MenuRow label="Angebote" />
 
             {isAdmin && (
-              <Link
-                to="/admin/customers"
-                onClick={onClose}
-                className="flex items-center justify-between px-4 py-3 hover:bg-gray-50"
-              >
-                <span>Adminbereich · Kundenverwaltung</span>
-                <ArrowRight size={18} />
-              </Link>
+              <>
+                <Link
+                  to="/admin/customers"
+                  onClick={onClose}
+                  className="flex items-center justify-between px-4 py-3 hover:bg-gray-50"
+                >
+                  <span>Adminbereich · Kundenverwaltung</span>
+                  <ArrowRight size={18} />
+                </Link>
+                <Link
+                  to="/admin/products"
+                  onClick={onClose}
+                  className="flex items-center justify-between px-4 py-3 hover:bg-gray-50"
+                >
+                  <span>Adminbereich · Produkte</span>
+                  <ArrowRight size={18} />
+                </Link>
+              </>
             )}
           </div>
 

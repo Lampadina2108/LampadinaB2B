@@ -12,6 +12,7 @@ import ProfileOverview from "./components/ProfileOverview";
 import SearchResults from "./components/SearchResults";
 import SetPasswordPage from "./components/SetPasswordPage";
 import AdminPanel from "./components/AdminPanel"; // Admin-Kundenverwaltung
+import AdminProducts from "./components/AdminProducts";
 
 import { useAuth } from "./contexts/AuthContext";
 
@@ -145,6 +146,17 @@ export default function App() {
           <AdminOnly>
             <Layout>
               <AdminPanel />
+            </Layout>
+          </AdminOnly>
+        }
+      />
+
+      <Route
+        path="/admin/products"
+        element={
+          <AdminOnly>
+            <Layout>
+              <AdminProducts />
             </Layout>
           </AdminOnly>
         }

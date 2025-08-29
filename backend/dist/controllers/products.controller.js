@@ -49,23 +49,35 @@ async function list(req, res) {
         const sqlCount = `SELECT COUNT(*) AS cnt FROM products p ${whereSql}`;
         const [cntRows] = await db_1.pool.query(sqlCount, params);
         const total = Number((_g = (_f = cntRows[0]) === null || _f === void 0 ? void 0 : _f.cnt) !== null && _g !== void 0 ? _g : 0);
+        let priceSelect = "NULL AS price";
+        let joinPrice = "";
+        const finalParams = [...params];
+        if (req.user) {
+            priceSelect = "COALESCE(cp.special_price, p.price) AS price";
+            joinPrice =
+                " LEFT JOIN customers c ON c.user_id = ? LEFT JOIN customer_prices cp ON cp.product_id = p.id AND cp.customer_id = c.id";
+            finalParams.push(req.user.id);
+        }
         const sqlData = `
       SELECT
         p.id, p.sku, p.name, p.category_slug, p.brand, p.description,
-        p.price, p.stock_quantity, p.created_at,
+        ${priceSelect}, p.stock_quantity, p.created_at,
         COALESCE(
           MAX(CASE WHEN i.is_primary = 1 THEN i.image_url END),
           MAX(i.image_url)
         ) AS image_url
       FROM products p
       LEFT JOIN product_images i ON i.product_id = p.id
+      ${joinPrice}
       ${whereSql}
       GROUP BY p.id
       ORDER BY ${orderBy}
       LIMIT ? OFFSET ?`;
-        const [rows] = await db_1.pool.query(sqlData, [...params, pageSize, offset]);
-        // rows ist bereits typisiert, nur sauber als JSON zurückgeben
-        res.json({ items: rows, total, page, pageSize });
+        finalParams.push(pageSize, offset);
+        const [rows] = await db_1.pool.query(sqlData, finalParams);
+        // Wenn kein User eingeloggt ist, sicherstellen, dass Preis null ist
+        const items = rows.map((r) => ({ ...r, price: req.user ? r.price : null }));
+        res.json({ items, total, page, pageSize });
     }
     catch (err) {
         console.error("products.list error:", err);
