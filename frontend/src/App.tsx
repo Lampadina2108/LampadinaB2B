@@ -7,7 +7,7 @@ import Footer from "./components/Footer";
 
 import HeroSlidesManager from "./components/HeroSlidesManager";
 import CategoryPage from "./components/CategoryPage";
-import ProductDetail from "./components/ProductDetail";
+import ProductDetailPage from "./components/ProductDetailPage";
 import ProfileOverview from "./components/ProfileOverview";
 import SearchResults from "./components/SearchResults";
 import SetPasswordPage from "./components/SetPasswordPage";
@@ -101,7 +101,7 @@ export default function App() {
         path="/product/:id"
         element={
           <Layout>
-            <ProductDetail />
+            <ProductDetailPage />
           </Layout>
         }
       />
