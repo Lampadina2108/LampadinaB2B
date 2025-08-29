@@ -18,7 +18,7 @@ router.use(attachUser);
 
 // ---- Health
 router.get("/health", (_req, res) =>
-  res.json({ ok: true, ts: new Date().toISOString() })
+res.json({ ok: true, ts: new Date().toISOString() })
 );
 
 // ---- Auth
@@ -26,37 +26,52 @@ router.post("/auth/login", Auth.login);
 
 // Fallback: nimm, was der Auth-Controller tatsächlich exportiert (register / registerUser / signup / create)
 router.post("/auth/register", (req, res, next) => {
-  const a: any = Auth;
-  const fn =
-    a.register ??
-    a.registerUser ??
-    a.signup ??
-    a.create ??
-    null;
-@@ -51,74 +52,165 @@ router.get("/categories", (req, res, next) => {
-  const fn = c.list ?? c.listCategories ?? c.index;
-  return fn ? fn(req, res, next) : res.json([]);
+const a: any = Auth;
+const fn =
+a.register ??
+a.registerUser ??
+a.signup ??
+a.create ??
+null;
+if (!fn) return res.status(501).json({ error: "register not implemented" });
+return fn(req, res, next);
+});
+
+router.get("/auth/me", requireAuth, Auth.me);
+
+// Passwort setzen / validieren
+router.get("/auth/password/validate", Password.validatePasswordToken);
+router.post("/auth/password/set", Password.setPassword);
+
+// ---- Profil (liefert user + customer)
+router.get("/profile", requireAuth, Profile.getProfile);
+
+// ---- Kategorien (bei dir heißt die Funktion meist list oder listCategories)
+router.get("/categories", (req, res, next) => {
+const c: any = Categories;
+const fn = c.list ?? c.listCategories ?? c.index;
+return fn ? fn(req, res, next) : res.json([]);
 });
 
 // Einzelne Kategorie nach Slug
 router.get("/categories/:slug", (req, res, next) => {
-  const c: any = Categories;
-  const fn = c.getBySlug ?? c.get ?? c.getCategory ?? null;
-  if (!fn) return res.status(404).json({ error: "not found" });
-  return fn(req, res, next);
+const c: any = Categories;
+const fn = c.getBySlug ?? c.get ?? c.getCategory ?? null;
+if (!fn) return res.status(404).json({ error: "not found" });
+return fn(req, res, next);
 });
 
 // ---- Produkte (listProducts / list / index / search – nimm was vorhanden ist)
 router.get("/products", (req, res, next) => {
-  const p: any = Products;
-  const fn =
-    p.listProducts ??
-    p.list ??
-    p.index ??
-    p.search ??
-    null;
-  if (!fn) return res.status(501).json({ error: "products not implemented" });
-  return fn(req, res, next);
+const p: any = Products;
+const fn =
+p.listProducts ??
+p.list ??
+p.index ??
+p.search ??
+null;
+if (!fn) return res.status(501).json({ error: "products not implemented" });
+return fn(req, res, next);
 });
 
 // Kategorie Shortcut
@@ -80,53 +95,52 @@ router.get("/products/:id", (req, res, next) => {
   if (!fn) return res.status(501).json({ error: "product detail not implemented" });
   return fn(req, res, next);
 });
-
 // ---- Hero-Slides
 router.get("/hero-slides", HeroSlides.list);
 
 // ---- Admin: Kundenverwaltung
 router.get(
-  "/admin/customers",
-  requireAdmin,
-  (req, res, next) => {
-    const ctrl: any = AdminCustomers;
-    const fn =
-      ctrl.listCustomers ??
-      ctrl.list ??
-      ctrl.index ??
-      null;
-    if (!fn) return res.status(501).json({ error: "listCustomers not implemented" });
-    return fn(req, res, next);
-  }
+"/admin/customers",
+requireAdmin,
+(req, res, next) => {
+const ctrl: any = AdminCustomers;
+const fn =
+ctrl.listCustomers ??
+ctrl.list ??
+ctrl.index ??
+null;
+if (!fn) return res.status(501).json({ error: "listCustomers not implemented" });
+return fn(req, res, next);
+}
 );
 
 router.post(
-  "/admin/customers/:id/approve",
-  requireAdmin,
-  (req, res, next) => {
-    const ctrl: any = AdminCustomers;
-    const fn =
-      ctrl.approveCustomer ??
-      ctrl.approve ??
-      null;
-    if (!fn) return res.status(501).json({ error: "approveCustomer not implemented" });
-    return fn(req, res, next);
-  }
+"/admin/customers/:id/approve",
+requireAdmin,
+(req, res, next) => {
+const ctrl: any = AdminCustomers;
+const fn =
+ctrl.approveCustomer ??
+ctrl.approve ??
+null;
+if (!fn) return res.status(501).json({ error: "approveCustomer not implemented" });
+return fn(req, res, next);
+}
 );
 
 router.post(
-  "/admin/customers/:id/delete",
-  requireAdmin,
-  (req, res, next) => {
-    const ctrl: any = AdminCustomers;
-    const fn =
-      ctrl.deleteCustomer ??
-      ctrl.remove ??
-      ctrl.delete ??
-      null;
-    if (!fn) return res.status(501).json({ error: "deleteCustomer not implemented" });
-    return fn(req, res, next);
-  }
+"/admin/customers/:id/delete",
+requireAdmin,
+(req, res, next) => {
+const ctrl: any = AdminCustomers;
+const fn =
+ctrl.deleteCustomer ??
+ctrl.remove ??
+ctrl.delete ??
+null;
+if (!fn) return res.status(501).json({ error: "deleteCustomer not implemented" });
+return fn(req, res, next);
+}
 );
 
 // ---- Admin: Produkte
