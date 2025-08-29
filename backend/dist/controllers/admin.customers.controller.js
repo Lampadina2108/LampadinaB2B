@@ -42,7 +42,7 @@ async function approveCustomer(req, res) {
         const { user_id: userId, email, contact_person } = row;
         await db_1.pool.query(`UPDATE customers
 
-        SET approval_status='invited', activation_sent_at=NOW()
+          SET approval_status='invited', activation_sent_at=NOW()
 
         WHERE id = ?`, [id]);
         // neuen Aktivierungstoken erzeugen

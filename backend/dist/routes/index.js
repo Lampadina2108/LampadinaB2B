@@ -71,6 +71,15 @@ router.get("/categories", (req, res, next) => {
     const fn = (_b = (_a = c.list) !== null && _a !== void 0 ? _a : c.listCategories) !== null && _b !== void 0 ? _b : c.index;
     return fn ? fn(req, res, next) : res.json([]);
 });
+// Einzelne Kategorie nach Slug
+router.get("/categories/:slug", (req, res, next) => {
+    var _a, _b, _c;
+    const c = Categories;
+    const fn = (_c = (_b = (_a = c.getBySlug) !== null && _a !== void 0 ? _a : c.get) !== null && _b !== void 0 ? _b : c.getCategory) !== null && _c !== void 0 ? _c : null;
+    if (!fn)
+        return res.status(404).json({ error: "not found" });
+    return fn(req, res, next);
+});
 // ---- Produkte (listProducts / list / index / search – nimm was vorhanden ist)
 router.get("/products", (req, res, next) => {
     var _a, _b, _c, _d;

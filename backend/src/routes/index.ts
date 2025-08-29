@@ -51,6 +51,14 @@ router.get("/categories", (req, res, next) => {
   return fn ? fn(req, res, next) : res.json([]);
 });
 
+// Einzelne Kategorie nach Slug
+router.get("/categories/:slug", (req, res, next) => {
+  const c: any = Categories;
+  const fn = c.getBySlug ?? c.get ?? c.getCategory ?? null;
+  if (!fn) return res.status(404).json({ error: "not found" });
+  return fn(req, res, next);
+});
+
 // ---- Produkte (listProducts / list / index / search – nimm was vorhanden ist)
 router.get("/products", (req, res, next) => {
   const p: any = Products;

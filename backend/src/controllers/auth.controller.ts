@@ -111,7 +111,6 @@ export async function register(req: Request, res: Response) {
           "Registrierung bei Lampadina",
           `<p>Hallo ${contactPerson},</p><p>vielen Dank für Ihre Registrierung bei Lampadina.</p><p>Wir prüfen Ihre Angaben und senden Ihnen in Kürze einen Freischaltlink.</p><p>Ihr Lampadina Team</p>`
         );
-
         await sendMail(
           "vertrieb@lampadina.icu",
           "Neue Kundenregistrierung",
