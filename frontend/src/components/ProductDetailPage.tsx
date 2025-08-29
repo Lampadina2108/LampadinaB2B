@@ -30,21 +30,31 @@ const ProductDetailPage: React.FC = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [mainImage, setMainImage] = useState<string>("");
   const [qty, setQty] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { add } = useCart();
   const { state } = useAuth();
 
   useEffect(() => {
     if (!id) return;
+    setLoading(true);
+    setError(null);
     Api.getProduct(id)
       .then((p: Product) => {
         setProduct(p);
         const primary = p.images.find((i) => i.is_primary) || p.images[0];
         setMainImage(primary ? primary.url : "");
       })
-      .catch(() => setProduct(null));
+      .catch((e: any) => {
+        setError(e?.message || "Fehler");
+        setProduct(null);
+      })
+      .finally(() => setLoading(false));
   }, [id]);
 
-  if (!product) return <div>Laden...</div>;
+  if (loading) return <div>Laden...</div>;
+  if (error) return <div>{error}</div>;
+  if (!product) return <div>Produkt nicht gefunden.</div>;
 
   const handleAdd = () => {
     add({ ...product }, qty);
