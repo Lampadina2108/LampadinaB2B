@@ -66,7 +66,7 @@ export default function SearchResults() {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {items.map((p) => (
-<Link
+          <Link
             key={p.id}
             to={`/product/${p.id}`}
             className="rounded border bg-white hover:shadow-sm transition p-3 block"
@@ -79,7 +79,7 @@ export default function SearchResults() {
               )}
             </div>
             <h3 className="mt-2 text-sm font-medium line-clamp-2">{p.name}</h3>
- {state.user ? (
+            {state.user ? (
               <div className="mt-2 font-semibold">{formatPrice(p.price)}</div>
             ) : (
               <div className="mt-2 text-sm text-slate-500">

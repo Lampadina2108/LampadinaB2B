@@ -33,22 +33,7 @@ router.post("/auth/register", (req, res, next) => {
     a.signup ??
     a.create ??
     null;
-  if (!fn) return res.status(501).json({ error: "register not implemented" });
-  return fn(req, res, next);
-});
-
-router.get("/auth/me", requireAuth, Auth.me);
-
-// Passwort setzen / validieren
-router.get("/auth/password/validate", Password.validatePasswordToken);
-router.post("/auth/password/set", Password.setPassword);
-
-// ---- Profil (liefert user + customer)
-router.get("/profile", requireAuth, Profile.getProfile);
-
-// ---- Kategorien (bei dir heißt die Funktion meist list oder listCategories)
-router.get("/categories", (req, res, next) => {
-  const c: any = Categories;
+@@ -51,74 +52,165 @@ router.get("/categories", (req, res, next) => {
   const fn = c.list ?? c.listCategories ?? c.index;
   return fn ? fn(req, res, next) : res.json([]);
 });
@@ -71,6 +56,20 @@ router.get("/products", (req, res, next) => {
     p.search ??
     null;
   if (!fn) return res.status(501).json({ error: "products not implemented" });
+  return fn(req, res, next);
+});
+
+// Kategorie Shortcut
+router.get("/products/category/:slug", (req, res, next) => {
+  const p: any = Products;
+  const fn =
+    p.listProducts ??
+    p.list ??
+    p.index ??
+    p.search ??
+    null;
+  if (!fn) return res.status(501).json({ error: "products not implemented" });
+  req.query.category = req.params.slug;
   return fn(req, res, next);
 });
 
@@ -169,5 +168,34 @@ router.post(
     return fn(req, res, next);
   }
 );
+
+router.get(
+  "/admin/products/:id/customer-prices",
+  requireAdmin,
+  (req, res, next) => {
+    const ctrl: any = AdminProducts;
+    const fn = ctrl.listCustomerPrices ?? null;
+    if (!fn) return res.status(501).json({ error: "listCustomerPrices not implemented" });
+    return fn(req, res, next);
+  }
+);
+
+router.delete(
+  "/admin/products/:id/customer-price/:customerId",
+  requireAdmin,
+  (req, res, next) => {
+    const ctrl: any = AdminProducts;
+    const fn = ctrl.deleteCustomerPrice ?? null;
+    if (!fn) return res.status(501).json({ error: "deleteCustomerPrice not implemented" });
+    return fn(req, res, next);
+  }
+);
+
+router.get("/admin/attributes", requireAdmin, (req, res, next) => {
+  const ctrl: any = AdminProducts;
+  const fn = ctrl.listAttributes ?? null;
+  if (!fn) return res.status(501).json({ error: "listAttributes not implemented" });
+  return fn(req, res, next);
+});
 
 export default router;

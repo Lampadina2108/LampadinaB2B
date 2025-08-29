@@ -237,8 +237,8 @@ export const AdminApi = {
   deleteCustomer(id: number) {
     return request(`/admin/customers/${id}/delete`, { method: "POST" });
   },
-  listProducts() {
-    return request<any[]>("/admin/products");
+  listProducts(params: { search?: string; category?: string } = {}) {
+    return request<any[]>(`/admin/products${qs(params)}`);
   },
   createProduct(data: any) {
     return request("/admin/products", { method: "POST", body: JSON.stringify(data) });
@@ -255,7 +255,17 @@ export const AdminApi = {
       body: JSON.stringify({ customerId, price }),
     });
   },
+  listCustomerPrices(productId: number) {
+    return request(`/admin/products/${productId}/customer-prices`);
+  },
+  deleteCustomerPrice(productId: number, customerId: number) {
+    return request(`/admin/products/${productId}/customer-price/${customerId}`, { method: "DELETE" });
+  },
+  listAttributes() {
+    return request(`/admin/attributes`);
+  },
 };
 
 // Default-Export zusätzlich anbieten, falls irgendwo "import Api from ..." genutzt wird
 export default Api;
+
