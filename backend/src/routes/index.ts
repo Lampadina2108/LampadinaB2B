@@ -8,6 +8,7 @@ import * as Products from "../controllers/products.controller";
 import * as Categories from "../controllers/categories.controller";
 import * as AdminCustomers from "../controllers/admin.customers.controller";
 import * as Password from "../controllers/password.controller";
+import * as HeroSlides from "../controllers/heroSlides.controller";
 
 const router = Router();
 
@@ -72,8 +73,8 @@ router.get("/products", (req, res, next) => {
   return fn(req, res, next);
 });
 
-// Hero-Slides (verhindert 404 im Frontend – gern später durch echten Controller ersetzen)
-router.get("/hero-slides", (_req, res) => res.json([]));
+// ---- Hero-Slides
+router.get("/hero-slides", HeroSlides.list);
 
 // ---- Admin: Kundenverwaltung
 router.get(

@@ -1,5 +1,6 @@
 // src/components/HeroSlidesManager.tsx
 import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { API_BASE } from "../lib/api";
 
 type Slide = {
@@ -21,11 +22,16 @@ function toCDN(path: string): string {
 }
 
 export default function HeroSlidesManager() {
+  const { search } = useLocation();
+  const params = new URLSearchParams(search);
+  const hidden = params.has("q") || params.has("category");
+
   const [slides, setSlides] = useState<Slide[]>([]);
   const [i, setI] = useState(0);
 
   // Slides laden
   useEffect(() => {
+    if (hidden) return;
     let alive = true;
     fetch(`${API_BASE}/hero-slides`, { credentials: "include" })
       .then((r) => (r.ok ? r.json() : Promise.reject()))
@@ -38,7 +44,7 @@ export default function HeroSlidesManager() {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [hidden]);
 
   // Auto-Slide
   useEffect(() => {
@@ -47,7 +53,7 @@ export default function HeroSlidesManager() {
     return () => clearInterval(t);
   }, [slides]);
 
-  if (!slides.length) return null;
+  if (hidden || !slides.length) return null;
 
   const s = slides[i];
   const imgSrc = toCDN(s.image_url);
