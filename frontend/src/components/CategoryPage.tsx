@@ -81,7 +81,11 @@ export default function CategoryPage() {
       {/* Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {items.map((p) => (
-          <article key={p.id} className="rounded border bg-white hover:shadow-sm transition p-3">
+          <Link
+            key={p.id}
+            to={`/product/${p.id}`}
+            className="rounded border bg-white hover:shadow-sm transition p-3 block"
+          >
             <div className="aspect-square w-full bg-slate-50 rounded flex items-center justify-center overflow-hidden">
               {p.image_url ? (
                 <img
@@ -98,7 +102,7 @@ export default function CategoryPage() {
             <div className="mt-1 text-[13px] text-slate-500">{p.sku ?? ""}</div>
             <div className="mt-2 font-semibold">{formatPrice(p.price)}</div>
             {p.unit && <div className="text-xs text-slate-500">/{p.unit}</div>}
-          </article>
+          </Link>
         ))}
       </div>
     </div>

@@ -203,6 +203,10 @@ export const Api = {
     });
   },
 
+  getProduct(id: number | string) {
+    return request<any>(`/products/${encodeURIComponent(id)}`);
+  },
+
   // Hero Slides (Admin)
   listHeroSlides() {
     return request<{ id: number; title?: string; subtitle?: string; image_url: string }[]>(

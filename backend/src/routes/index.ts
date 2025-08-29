@@ -73,6 +73,14 @@ router.get("/products", (req, res, next) => {
   return fn(req, res, next);
 });
 
+// Einzelnes Produkt
+router.get("/products/:id", (req, res, next) => {
+  const p: any = Products;
+  const fn = p.get ?? p.getProduct ?? p.show ?? null;
+  if (!fn) return res.status(501).json({ error: "product detail not implemented" });
+  return fn(req, res, next);
+});
+
 // ---- Hero-Slides
 router.get("/hero-slides", HeroSlides.list);
 

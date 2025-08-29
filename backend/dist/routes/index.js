@@ -90,6 +90,15 @@ router.get("/products", (req, res, next) => {
         return res.status(501).json({ error: "products not implemented" });
     return fn(req, res, next);
 });
+// Einzelnes Produkt
+router.get("/products/:id", (req, res, next) => {
+    var _a, _b, _c;
+    const p = Products;
+    const fn = (_c = (_b = (_a = p.get) !== null && _a !== void 0 ? _a : p.getProduct) !== null && _b !== void 0 ? _b : p.show) !== null && _c !== void 0 ? _c : null;
+    if (!fn)
+        return res.status(501).json({ error: "product detail not implemented" });
+    return fn(req, res, next);
+});
 // ---- Hero-Slides
 router.get("/hero-slides", HeroSlides.list);
 // ---- Admin: Kundenverwaltung

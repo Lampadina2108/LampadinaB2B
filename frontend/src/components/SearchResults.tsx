@@ -64,7 +64,11 @@ export default function SearchResults() {
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {items.map((p) => (
-          <article key={p.id} className="rounded border bg-white hover:shadow-sm transition p-3">
+          <Link
+            key={p.id}
+            to={`/product/${p.id}`}
+            className="rounded border bg-white hover:shadow-sm transition p-3 block"
+          >
             <div className="aspect-square w-full bg-slate-50 rounded flex items-center justify-center overflow-hidden">
               {p.image_url ? (
                 <img src={p.image_url} alt={p.name} className="object-contain w-full h-full" />
@@ -74,7 +78,7 @@ export default function SearchResults() {
             </div>
             <h3 className="mt-2 text-sm font-medium line-clamp-2">{p.name}</h3>
             <div className="mt-2 font-semibold">{formatPrice(p.price)}</div>
-          </article>
+          </Link>
         ))}
       </div>
     </div>
